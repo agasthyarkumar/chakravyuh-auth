@@ -25,17 +25,13 @@ func ApproveTenant(
 		return err
 	}
 
-	// Get tenant info for audit log
-	tenant, err := repository.GetTenantByID(id)
-	if err == nil {
-		// Log tenant approval
-		_ = LogAction(
-			id,
-			0,
-			"TENANT_APPROVED",
-			"Tenant "+tenant.Name+" was approved by superadmin",
-		)
-	}
+	// Log tenant approval
+	_ = LogAction(
+		id,
+		0,
+		"TENANT_APPROVED",
+		"Tenant was approved by superadmin",
+	)
 
 	return nil
 }

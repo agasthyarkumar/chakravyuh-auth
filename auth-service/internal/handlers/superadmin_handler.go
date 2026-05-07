@@ -53,3 +53,17 @@ func ApproveTenant(c *gin.Context) {
 		"message": "Tenant approved successfully",
 	})
 }
+
+func GetAuditLogs(c *gin.Context) {
+	logs, err := services.GetAuditLogs()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to fetch audit logs",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"audit_logs": logs,
+	})
+}

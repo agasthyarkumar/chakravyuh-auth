@@ -136,7 +136,7 @@ func Login(
 		return "", "", err
 	}
 
-	// Log the login action
+	// Log user login
 	_ = LogAction(
 		user.TenantID,
 		user.ID,

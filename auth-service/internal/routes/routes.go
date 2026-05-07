@@ -8,11 +8,14 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
-	// Apply rate limiting middleware globally
-	rateLimiter := middleware.NewRateLimiter()
-	router.Use(middleware.RateLimitMiddleware(rateLimiter))
 
-	// Apply API key middleware
+	// Create a new distributed rate limiter instance
+	rateLimiter := middleware.NewDistributedRateLimiter()
+
+	// Apply rate limiting globally
+	router.Use(middleware.DistributedRateLimitMiddleware(rateLimiter))
+
+	// Apply API key authentication middleware (optional, gracefully skipped if not present)
 	router.Use(middleware.APIKeyMiddleware())
 
 	router.GET("/health", func(c *gin.Context) {
@@ -96,6 +99,21 @@ func SetupRoutes(router *gin.Engine) {
 		handlers.CreateInvitation,
 	)
 
+	admin.POST(
+		"/api-keys",
+		handlers.CreateAPIKey,
+	)
+
+	admin.GET(
+		"/api-keys",
+		handlers.ListAPIKeys,
+	)
+
+	admin.DELETE(
+		"/api-keys/:id",
+		handlers.RevokeAPIKey,
+	)
+
 	// =========================
 	// SUPERADMIN ROUTES
 	// =========================
@@ -127,22 +145,8 @@ func SetupRoutes(router *gin.Engine) {
 		handlers.ApproveTenant,
 	)
 
-	// =========================
-	// API KEY MANAGEMENT ROUTES
-	// =========================
-
-	admin.POST(
-		"/api-keys",
-		handlers.CreateAPIKey,
-	)
-
-	admin.GET(
-		"/api-keys",
-		handlers.ListAPIKeys,
-	)
-
-	admin.DELETE(
-		"/api-keys/:id",
-		handlers.RevokeAPIKey,
+	superadmin.GET(
+		"/audit-logs",
+		handlers.GetAuditLogs,
 	)
 }

@@ -42,3 +42,25 @@ func GenerateJWT(
 		[]byte(config.AppConfig.JWTSecret),
 	)
 }
+
+// ParseJWT parses a JWT token and returns its claims
+func ParseJWT(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		jwt.MapClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(config.AppConfig.JWTSecret), nil
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, err
+	}
+
+	return claims, nil
+}

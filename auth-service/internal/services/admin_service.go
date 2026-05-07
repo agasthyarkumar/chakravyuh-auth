@@ -44,13 +44,12 @@ func CreateTenantUser(
 		return err
 	}
 
-	// Log the action (use 0 for admin user ID since we don't have it in context)
-	// This can be enhanced later with proper admin user tracking
+	// Log user creation
 	_ = LogAction(
 		tenantID,
-		0,
+		0, // admin context, not linked to a specific user
 		"ADMIN_CREATED_USER",
-		"User "+username+" was created with role "+role,
+		"Admin created user '"+username+"' with role '"+role+"'",
 	)
 
 	return nil
@@ -74,17 +73,17 @@ func DeleteTenantUser(
 	}
 
 	err = repository.DeleteUser(userID)
-	
+
 	if err != nil {
 		return err
 	}
 
-	// Log the deletion
+	// Log user deletion
 	_ = LogAction(
 		requestingTenantID,
 		0,
 		"ADMIN_DELETED_USER",
-		"User "+user.Username+" (ID: "+string(rune(user.ID))+") was deleted",
+		"Admin deleted user '"+user.Username+"'",
 	)
 
 	return nil

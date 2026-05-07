@@ -5,12 +5,10 @@ import (
 	"auth-service/internal/models"
 )
 
-// CreateAPIKey creates a new API key
 func CreateAPIKey(apiKey *models.APIKey) error {
 	return database.DB.Create(apiKey).Error
 }
 
-// GetAPIKey fetches an API key by hash
 func GetAPIKey(keyHash string) (*models.APIKey, error) {
 	var apiKey models.APIKey
 
@@ -25,7 +23,6 @@ func GetAPIKey(keyHash string) (*models.APIKey, error) {
 	return &apiKey, nil
 }
 
-// GetAPIKeysByTenant fetches all API keys for a tenant
 func GetAPIKeysByTenant(tenantID uint) ([]models.APIKey, error) {
 	var apiKeys []models.APIKey
 
@@ -37,7 +34,6 @@ func GetAPIKeysByTenant(tenantID uint) ([]models.APIKey, error) {
 	return apiKeys, err
 }
 
-// RevokeAPIKey marks an API key as revoked
 func RevokeAPIKey(id uint) error {
 	return database.DB.
 		Model(&models.APIKey{}).
@@ -45,7 +41,6 @@ func RevokeAPIKey(id uint) error {
 		Update("revoked", true).Error
 }
 
-// GetAPIKeyByID fetches an API key by ID
 func GetAPIKeyByID(id uint) (*models.APIKey, error) {
 	var apiKey models.APIKey
 

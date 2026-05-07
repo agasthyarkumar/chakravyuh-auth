@@ -42,7 +42,7 @@ func CreateInvitation(
 		tenantID,
 		0,
 		"INVITATION_CREATED",
-		"Invitation sent to "+email+" with role "+role,
+		"Invitation created for "+email+" with role "+role,
 	)
 
 	return token, nil
@@ -108,7 +108,7 @@ func AcceptInvitation(
 		invitation.TenantID,
 		user.ID,
 		"INVITATION_ACCEPTED",
-		"User "+username+" accepted invitation sent to "+invitation.Email,
+		"User "+username+" accepted invitation",
 	)
 
 	return nil

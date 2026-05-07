@@ -5,7 +5,6 @@ import (
 	"auth-service/internal/models"
 )
 
-// AssignPermission assigns a permission to a user
 func AssignPermission(userID uint, permissionID uint) error {
 	userPermission := models.UserPermission{
 		UserID:       userID,
@@ -14,14 +13,12 @@ func AssignPermission(userID uint, permissionID uint) error {
 	return database.DB.Create(&userPermission).Error
 }
 
-// RevokePermission removes a permission from a user
 func RevokePermission(userID uint, permissionID uint) error {
 	return database.DB.
 		Where("user_id = ? AND permission_id = ?", userID, permissionID).
 		Delete(&models.UserPermission{}).Error
 }
 
-// GetUserPermissions fetches all permissions for a user
 func GetUserPermissions(userID uint) ([]models.Permission, error) {
 	var permissions []models.Permission
 
@@ -33,7 +30,6 @@ func GetUserPermissions(userID uint) ([]models.Permission, error) {
 	return permissions, err
 }
 
-// HasPermission checks if a user has a specific permission
 func HasPermission(userID uint, permissionName string) (bool, error) {
 	var count int64
 
@@ -46,7 +42,6 @@ func HasPermission(userID uint, permissionName string) (bool, error) {
 	return count > 0, err
 }
 
-// GetPermissionByName fetches a permission by name
 func GetPermissionByName(name string) (*models.Permission, error) {
 	var permission models.Permission
 
@@ -61,7 +56,6 @@ func GetPermissionByName(name string) (*models.Permission, error) {
 	return &permission, nil
 }
 
-// CreatePermission creates a new permission
 func CreatePermission(permission *models.Permission) error {
 	return database.DB.Create(permission).Error
 }

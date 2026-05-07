@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"auth-service/internal/config"
+	"auth-service/internal/services"
 	"net/http"
 	"strings"
 
@@ -57,6 +58,18 @@ func AuthMiddleware() gin.HandlerFunc {
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid claims",
+			})
+
+			c.Abort()
+
+			return
+		}
+
+		// Check if token has been revoked
+		isRevoked := services.IsTokenRevoked(tokenString[1])
+		if isRevoked {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Token has been revoked",
 			})
 
 			c.Abort()
