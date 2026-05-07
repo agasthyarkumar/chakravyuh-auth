@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"auth-service/internal/config"
+	"auth-service/internal/services"
 	"net/http"
 	"strings"
 
@@ -35,9 +36,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(tokenString[1], func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.AppConfig.JWTSecret), nil
-		})
+		token, err := jwt.Parse(
+			tokenString[1],
+			func(token *jwt.Token) (interface{}, error) {
+				return []byte(config.AppConfig.JWTSecret), nil
+			},
+		)
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -61,7 +65,20 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Check if token has been revoked
+		isRevoked := services.IsTokenRevoked(tokenString[1])
+		if isRevoked {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Token has been revoked",
+			})
+
+			c.Abort()
+
+			return
+		}
+
 		c.Set("user_id", claims["user_id"])
+		c.Set("tenant_id", claims["tenant_id"])
 		c.Set("username", claims["username"])
 		c.Set("role", claims["role"])
 

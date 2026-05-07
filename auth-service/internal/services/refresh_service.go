@@ -2,13 +2,17 @@ package services
 
 import (
 	"auth-service/internal/repository"
+	"auth-service/internal/redis"
 	"auth-service/internal/utils"
+	"context"
 	"errors"
 	"time"
 )
 
 func Refresh(refreshToken string) (string, error) {
-	tokenRecord, err := repository.GetRefreshToken(refreshToken)
+	tokenRecord, err := repository.GetRefreshToken(
+		refreshToken,
+	)
 
 	if err != nil {
 		return "", errors.New("invalid refresh token")
@@ -18,7 +22,9 @@ func Refresh(refreshToken string) (string, error) {
 		return "", errors.New("refresh token expired")
 	}
 
-	user, err := repository.GetUserByID(tokenRecord.UserID)
+	user, err := repository.GetUserByID(
+		tokenRecord.UserID,
+	)
 
 	if err != nil {
 		return "", err
@@ -26,6 +32,7 @@ func Refresh(refreshToken string) (string, error) {
 
 	accessToken, err := utils.GenerateJWT(
 		user.ID,
+		user.TenantID,
 		user.Username,
 		user.Role,
 	)
@@ -34,9 +41,26 @@ func Refresh(refreshToken string) (string, error) {
 		return "", err
 	}
 
+	// Log token refresh
+	_ = LogAction(
+		user.TenantID,
+		user.ID,
+		"TOKEN_REFRESH",
+		"User refreshed access token",
+	)
+
 	return accessToken, nil
 }
 
 func Logout(refreshToken string) error {
-	return repository.DeleteRefreshToken(refreshToken)
+	// Revoke refresh token via Redis
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = redis.Delete(ctx, "refresh_token:"+refreshToken)
+
+	// Delete from database
+	return repository.DeleteRefreshToken(
+		refreshToken,
+	)
 }

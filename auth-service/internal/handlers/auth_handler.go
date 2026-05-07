@@ -7,13 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AuthInput struct {
+type RegisterInput struct {
+	TenantName string `json:"tenant_name"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+}
+
+type LoginInput struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 func Register(c *gin.Context) {
-	var input AuthInput
+	var input RegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -24,6 +30,7 @@ func Register(c *gin.Context) {
 	}
 
 	err := services.Register(
+		input.TenantName,
 		input.Username,
 		input.Password,
 	)
@@ -37,12 +44,12 @@ func Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "User registered successfully",
+		"message": "Tenant and admin user created successfully",
 	})
 }
 
 func Login(c *gin.Context) {
-	var input AuthInput
+	var input LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -66,7 +73,7 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
+		"access_token": accessToken,
 		"refresh_token": refreshToken,
 	})
 }

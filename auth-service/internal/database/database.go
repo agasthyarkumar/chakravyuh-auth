@@ -22,7 +22,10 @@ func ConnectDB() {
 		config.AppConfig.DBPort,
 	)
 
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	database, err := gorm.Open(
+		postgres.Open(dsn),
+		&gorm.Config{},
+	)
 
 	if err != nil {
 		log.Fatal("Failed to connect to database")
@@ -33,7 +36,13 @@ func ConnectDB() {
 	log.Println("Database connected successfully")
 
 	DB.AutoMigrate(
+		&models.Tenant{},
 		&models.User{},
 		&models.RefreshToken{},
+		&models.Invitation{},
+		&models.AuditLog{},
+		&models.Permission{},
+		&models.UserPermission{},
+		&models.APIKey{},
 	)
 }

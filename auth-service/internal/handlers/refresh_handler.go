@@ -50,6 +50,10 @@ func Logout(c *gin.Context) {
 		return
 	}
 
+	// Extract user context
+	userID, _ := c.Get("user_id")
+	tenantID, _ := c.Get("tenant_id")
+
 	err := services.Logout(input.RefreshToken)
 
 	if err != nil {
@@ -58,6 +62,18 @@ func Logout(c *gin.Context) {
 		})
 
 		return
+	}
+
+	// Log user logout
+	if userID != nil && tenantID != nil {
+		uid := uint(userID.(float64))
+		tid := uint(tenantID.(float64))
+		_ = services.LogAction(
+			tid,
+			uid,
+			"USER_LOGOUT",
+			"User logged out",
+		)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
