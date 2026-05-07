@@ -12,7 +12,17 @@ func CreateUser(user *models.User) error {
 func GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
 
-	err := database.DB.Where("username = ?", username).First(&user).Error
+	err := database.DB.
+		Where("username = ?", username).
+		First(&user).Error
+
+	return &user, err
+}
+
+func GetUserByID(id uint) (*models.User, error) {
+	var user models.User
+
+	err := database.DB.First(&user, id).Error
 
 	return &user, err
 }

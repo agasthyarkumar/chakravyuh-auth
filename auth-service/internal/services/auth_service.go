@@ -1,10 +1,13 @@
 package services
 
 import (
+	"auth-service/internal/config"
 	"auth-service/internal/models"
 	"auth-service/internal/repository"
 	"auth-service/internal/utils"
 	"errors"
+	"strconv"
+	"time"
 )
 
 func Register(username string, password string) error {
@@ -23,24 +26,62 @@ func Register(username string, password string) error {
 	return repository.CreateUser(&user)
 }
 
-func Login(username string, password string) (string, error) {
+func Login(
+	username string,
+	password string,
+) (string, string, error) {
+
 	user, err := repository.GetUserByUsername(username)
 
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return "", "", errors.New("invalid credentials")
 	}
 
-	valid := utils.CheckPassword(password, user.PasswordHash)
+	valid := utils.CheckPassword(
+		password,
+		user.PasswordHash,
+	)
 
 	if !valid {
-		return "", errors.New("invalid credentials")
+		return "", "", errors.New("invalid credentials")
 	}
 
-	token, err := utils.GenerateJWT(user.ID, user.Username, user.Role)
+	accessToken, err := utils.GenerateJWT(
+		user.ID,
+		user.Username,
+		user.Role,
+	)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return token, nil
+	refreshTokenString, err := utils.GenerateRefreshToken()
+
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshDays, err := strconv.Atoi(
+		config.AppConfig.RefreshTokenExpiryDays,
+	)
+
+	if err != nil {
+		refreshDays = 7
+	}
+
+	refreshToken := models.RefreshToken{
+		UserID: user.ID,
+		Token:  refreshTokenString,
+		ExpiresAt: time.Now().
+			Add(time.Hour * 24 * time.Duration(refreshDays)),
+	}
+
+	err = repository.SaveRefreshToken(&refreshToken)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshTokenString, nil
 }

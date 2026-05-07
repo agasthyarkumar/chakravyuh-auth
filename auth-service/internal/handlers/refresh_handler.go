@@ -1,0 +1,66 @@
+package handlers
+
+import (
+	"auth-service/internal/services"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+type RefreshInput struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+func Refresh(c *gin.Context) {
+	var input RefreshInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid input",
+		})
+
+		return
+	}
+
+	accessToken, err := services.Refresh(
+		input.RefreshToken,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"access_token": accessToken,
+	})
+}
+
+func Logout(c *gin.Context) {
+	var input RefreshInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid input",
+		})
+
+		return
+	}
+
+	err := services.Logout(input.RefreshToken)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Logout failed",
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logged out successfully",
+	})
+}

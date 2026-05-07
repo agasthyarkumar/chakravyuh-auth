@@ -23,7 +23,10 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err := services.Register(input.Username, input.Password)
+	err := services.Register(
+		input.Username,
+		input.Password,
+	)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -49,7 +52,10 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := services.Login(input.Username, input.Password)
+	accessToken, refreshToken, err := services.Login(
+		input.Username,
+		input.Password,
+	)
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -60,6 +66,7 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
 	})
 }
