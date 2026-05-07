@@ -22,6 +22,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.POST("/register", handlers.Register)
 	router.POST("/login", handlers.Login)
 	router.POST("/refresh", handlers.Refresh)
+	router.POST("/accept-invite", handlers.AcceptInvitation)
 
 	// =========================
 	// AUTHENTICATED ROUTES
@@ -72,6 +73,21 @@ func SetupRoutes(router *gin.Engine) {
 	admin.GET(
 		"/users",
 		handlers.GetTenantUsers,
+	)
+
+	admin.POST(
+		"/users",
+		handlers.CreateTenantUser,
+	)
+
+	admin.DELETE(
+		"/users/:id",
+		handlers.DeleteTenantUser,
+	)
+
+	admin.POST(
+		"/invitations",
+		handlers.CreateInvitation,
 	)
 
 	// =========================

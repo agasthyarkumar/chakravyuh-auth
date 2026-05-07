@@ -36,3 +36,10 @@ func GetUsersByTenantID(tenantID uint) ([]models.User, error) {
 
 	return users, err
 }
+
+func DeleteUser(id uint) error {
+	return database.DB.Delete(
+		&models.User{},
+		id,
+	).Error
+}

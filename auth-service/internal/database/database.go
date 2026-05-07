@@ -39,5 +39,6 @@ func ConnectDB() {
 		&models.Tenant{},
 		&models.User{},
 		&models.RefreshToken{},
+		&models.Invitation{},
 	)
 }
