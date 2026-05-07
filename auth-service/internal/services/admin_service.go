@@ -38,7 +38,22 @@ func CreateTenantUser(
 		Role: role,
 	}
 
-	return repository.CreateUser(&user)
+	err = repository.CreateUser(&user)
+	
+	if err != nil {
+		return err
+	}
+
+	// Log the action (use 0 for admin user ID since we don't have it in context)
+	// This can be enhanced later with proper admin user tracking
+	_ = LogAction(
+		tenantID,
+		0,
+		"ADMIN_CREATED_USER",
+		"User "+username+" was created with role "+role,
+	)
+
+	return nil
 }
 
 func DeleteTenantUser(
@@ -58,5 +73,19 @@ func DeleteTenantUser(
 		return errors.New("access denied")
 	}
 
-	return repository.DeleteUser(userID)
+	err = repository.DeleteUser(userID)
+	
+	if err != nil {
+		return err
+	}
+
+	// Log the deletion
+	_ = LogAction(
+		requestingTenantID,
+		0,
+		"ADMIN_DELETED_USER",
+		"User "+user.Username+" (ID: "+string(rune(user.ID))+") was deleted",
+	)
+
+	return nil
 }

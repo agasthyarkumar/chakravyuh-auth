@@ -40,5 +40,9 @@ func ConnectDB() {
 		&models.User{},
 		&models.RefreshToken{},
 		&models.Invitation{},
+		&models.AuditLog{},
+		&models.Permission{},
+		&models.UserPermission{},
+		&models.APIKey{},
 	)
 }

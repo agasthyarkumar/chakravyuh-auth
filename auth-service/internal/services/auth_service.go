@@ -24,9 +24,12 @@ func Register(
 
 	tenant := models.Tenant{
 		Name: tenantName,
+		Approved: false,
 	}
 
-	err = repository.CreateTenant(&tenant)
+	err = repository.CreateTenant(
+		&tenant,
+	)
 
 	if err != nil {
 		return err
@@ -39,7 +42,9 @@ func Register(
 		Role: "admin",
 	}
 
-	return repository.CreateUser(&user)
+	return repository.CreateUser(
+		&user,
+	)
 }
 
 func Login(
@@ -47,10 +52,14 @@ func Login(
 	password string,
 ) (string, string, error) {
 
-	user, err := repository.GetUserByUsername(username)
+	user, err := repository.GetUserByUsername(
+		username,
+	)
 
 	if err != nil {
-		return "", "", errors.New("invalid credentials")
+		return "", "", errors.New(
+			"invalid credentials",
+		)
 	}
 
 	valid := utils.CheckPassword(
@@ -59,7 +68,32 @@ func Login(
 	)
 
 	if !valid {
-		return "", "", errors.New("invalid credentials")
+		return "", "", errors.New(
+			"invalid credentials",
+		)
+	}
+
+	// =========================
+	// CHECK TENANT APPROVAL
+	// =========================
+
+	if user.Role != "superadmin" {
+
+		tenant, err := repository.GetTenantByID(
+			user.TenantID,
+		)
+
+		if err != nil {
+			return "", "", errors.New(
+				"tenant not found",
+			)
+		}
+
+		if !tenant.Approved {
+			return "", "", errors.New(
+				"tenant pending approval",
+			)
+		}
 	}
 
 	accessToken, err := utils.GenerateJWT(
@@ -94,11 +128,21 @@ func Login(
 			Add(time.Hour * 24 * time.Duration(refreshDays)),
 	}
 
-	err = repository.SaveRefreshToken(&refreshToken)
+	err = repository.SaveRefreshToken(
+		&refreshToken,
+	)
 
 	if err != nil {
 		return "", "", err
 	}
+
+	// Log the login action
+	_ = LogAction(
+		user.TenantID,
+		user.ID,
+		"USER_LOGIN",
+		"User "+username+" logged in",
+	)
 
 	return accessToken, refreshTokenString, nil
 }

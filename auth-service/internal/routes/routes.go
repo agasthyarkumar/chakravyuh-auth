@@ -8,6 +8,12 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
+	// Apply rate limiting middleware globally
+	rateLimiter := middleware.NewRateLimiter()
+	router.Use(middleware.RateLimitMiddleware(rateLimiter))
+
+	// Apply API key middleware
+	router.Use(middleware.APIKeyMiddleware())
 
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -109,5 +115,34 @@ func SetupRoutes(router *gin.Engine) {
 				"message": "Welcome SuperAdmin",
 			})
 		},
+	)
+
+	superadmin.GET(
+		"/tenants/pending",
+		handlers.GetPendingTenants,
+	)
+
+	superadmin.POST(
+		"/tenants/:id/approve",
+		handlers.ApproveTenant,
+	)
+
+	// =========================
+	// API KEY MANAGEMENT ROUTES
+	// =========================
+
+	admin.POST(
+		"/api-keys",
+		handlers.CreateAPIKey,
+	)
+
+	admin.GET(
+		"/api-keys",
+		handlers.ListAPIKeys,
+	)
+
+	admin.DELETE(
+		"/api-keys/:id",
+		handlers.RevokeAPIKey,
 	)
 }

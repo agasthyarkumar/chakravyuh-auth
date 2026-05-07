@@ -37,6 +37,14 @@ func CreateInvitation(
 		return "", err
 	}
 
+	// Log invitation creation
+	_ = LogAction(
+		tenantID,
+		0,
+		"INVITATION_CREATED",
+		"Invitation sent to "+email+" with role "+role,
+	)
+
 	return token, nil
 }
 
@@ -87,7 +95,21 @@ func AcceptInvitation(
 
 	invitation.Accepted = true
 
-	return repository.UpdateInvitation(
+	err = repository.UpdateInvitation(
 		invitation,
 	)
+
+	if err != nil {
+		return err
+	}
+
+	// Log invitation acceptance
+	_ = LogAction(
+		invitation.TenantID,
+		user.ID,
+		"INVITATION_ACCEPTED",
+		"User "+username+" accepted invitation sent to "+invitation.Email,
+	)
+
+	return nil
 }
