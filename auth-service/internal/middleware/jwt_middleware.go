@@ -35,9 +35,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(tokenString[1], func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.AppConfig.JWTSecret), nil
-		})
+		token, err := jwt.Parse(
+			tokenString[1],
+			func(token *jwt.Token) (interface{}, error) {
+				return []byte(config.AppConfig.JWTSecret), nil
+			},
+		)
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -62,6 +65,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("user_id", claims["user_id"])
+		c.Set("tenant_id", claims["tenant_id"])
 		c.Set("username", claims["username"])
 		c.Set("role", claims["role"])
 

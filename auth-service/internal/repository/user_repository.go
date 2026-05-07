@@ -26,3 +26,13 @@ func GetUserByID(id uint) (*models.User, error) {
 
 	return &user, err
 }
+
+func GetUsersByTenantID(tenantID uint) ([]models.User, error) {
+	var users []models.User
+
+	err := database.DB.
+		Where("tenant_id = ?", tenantID).
+		Find(&users).Error
+
+	return users, err
+}

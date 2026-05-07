@@ -8,7 +8,9 @@ import (
 )
 
 func Refresh(refreshToken string) (string, error) {
-	tokenRecord, err := repository.GetRefreshToken(refreshToken)
+	tokenRecord, err := repository.GetRefreshToken(
+		refreshToken,
+	)
 
 	if err != nil {
 		return "", errors.New("invalid refresh token")
@@ -18,7 +20,9 @@ func Refresh(refreshToken string) (string, error) {
 		return "", errors.New("refresh token expired")
 	}
 
-	user, err := repository.GetUserByID(tokenRecord.UserID)
+	user, err := repository.GetUserByID(
+		tokenRecord.UserID,
+	)
 
 	if err != nil {
 		return "", err
@@ -26,6 +30,7 @@ func Refresh(refreshToken string) (string, error) {
 
 	accessToken, err := utils.GenerateJWT(
 		user.ID,
+		user.TenantID,
 		user.Username,
 		user.Role,
 	)
@@ -38,5 +43,7 @@ func Refresh(refreshToken string) (string, error) {
 }
 
 func Logout(refreshToken string) error {
-	return repository.DeleteRefreshToken(refreshToken)
+	return repository.DeleteRefreshToken(
+		refreshToken,
+	)
 }

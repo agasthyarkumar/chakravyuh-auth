@@ -10,17 +10,33 @@ import (
 	"time"
 )
 
-func Register(username string, password string) error {
+func Register(
+	tenantName string,
+	username string,
+	password string,
+) error {
+
 	hash, err := utils.HashPassword(password)
 
 	if err != nil {
 		return err
 	}
 
+	tenant := models.Tenant{
+		Name: tenantName,
+	}
+
+	err = repository.CreateTenant(&tenant)
+
+	if err != nil {
+		return err
+	}
+
 	user := models.User{
-		Username:     username,
+		TenantID: tenant.ID,
+		Username: username,
 		PasswordHash: hash,
-		Role:         "user",
+		Role: "admin",
 	}
 
 	return repository.CreateUser(&user)
@@ -48,6 +64,7 @@ func Login(
 
 	accessToken, err := utils.GenerateJWT(
 		user.ID,
+		user.TenantID,
 		user.Username,
 		user.Role,
 	)
@@ -72,7 +89,7 @@ func Login(
 
 	refreshToken := models.RefreshToken{
 		UserID: user.ID,
-		Token:  refreshTokenString,
+		Token: refreshTokenString,
 		ExpiresAt: time.Now().
 			Add(time.Hour * 24 * time.Duration(refreshDays)),
 	}

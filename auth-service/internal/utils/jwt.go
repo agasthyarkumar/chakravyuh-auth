@@ -8,7 +8,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(userID uint, username string, role string) (string, error) {
+func GenerateJWT(
+	userID uint,
+	tenantID uint,
+	username string,
+	role string,
+) (string, error) {
+
 	expiryMinutes, err := strconv.Atoi(
 		config.AppConfig.AccessTokenExpiryMinutes,
 	)
@@ -18,9 +24,10 @@ func GenerateJWT(userID uint, username string, role string) (string, error) {
 	}
 
 	claims := jwt.MapClaims{
-		"user_id":  userID,
-		"username": username,
-		"role":     role,
+		"user_id":   userID,
+		"tenant_id": tenantID,
+		"username":  username,
+		"role":      role,
 		"exp": time.Now().
 			Add(time.Minute * time.Duration(expiryMinutes)).
 			Unix(),
